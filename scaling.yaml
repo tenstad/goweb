@@ -1,0 +1,31 @@
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: goweb
+  namespace: dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: goweb
+  pollingInterval: 1
+  cooldownPeriod: 10
+  idleReplicaCount: 0
+  minReplicaCount: 1
+  maxReplicaCount: 12
+  advanced:
+    horizontalPodAutoscalerConfig:
+      name: goweb-hpa
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 3
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 3
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "50"
